@@ -253,3 +253,29 @@ void toast(BuildContext context, String msg) {
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(msg)));
 }
+// ---------- cart helpers (2) ----------
+extension CartHelper2 on AppState {
+  String get cartCurrency => cart.isEmpty
+      ? (country == 'BD' ? 'BDT' : 'USD')
+      : cart.values.first.product.currency;
+
+  int get cartSubtotal => cart.values
+      .fold<int>(0, (sum, l) => sum + l.product.priceMinor * l.qty);
+
+  void changeQty(String productId, int delta) {
+    final line = cart[productId];
+    if (line == null) return;
+    final next = line.qty + delta;
+    if (next <= 0) {
+      cart.remove(productId);
+    } else if (next <= line.product.stock) {
+      line.qty = next;
+    }
+    notify();
+  }
+
+  void clearCart() {
+    cart.clear();
+    notify();
+  }
+}
