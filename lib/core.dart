@@ -223,5 +223,33 @@ class AppState extends ChangeNotifier {
   final Map<String, CartLine> cart = {};
 
   String t(String key) => _tr[lang]?[key] ?? _tr['en']![key] ?? key;
-  String pname(Product p) =>
-      (lang == 'bn'
+    String pname(Product p) =>
+      (lang == 'bn' && (p.nameBn ?? '').isNotEmpty) ? p.nameBn! : p.name;
+
+  void notify() => notifyListeners();
+}
+
+// ---------- helpers added to fix build ----------
+extension CartHelper on AppState {
+  String? addToCart(Product p, {int qty = 1}) {
+    if (p.stock <= 0) return t('outOfStock');
+    final existing = cart[p.id];
+    final newQty = (existing?.qty ?? 0) + qty;
+    if (newQty > p.stock) return t('outOfStock');
+    if (existing != null) {
+      existing.qty = newQty;
+    } else {
+      cart[p.id] = CartLine(p, qty);
+    }
+    notifyListeners();
+    return null;
+  }
+}
+
+String errText(Object e) => e.toString();
+
+void toast(BuildContext context, String msg) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(msg)));
+}
