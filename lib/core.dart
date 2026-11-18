@@ -279,3 +279,36 @@ extension CartHelper2 on AppState {
     notify();
   }
 }
+// ---------- state helpers (3) ----------
+extension StateHelper3 on AppState {
+  int get cartCount =>
+      cart.values.fold<int>(0, (sum, l) => sum + l.qty);
+
+  Future<void> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    lang = prefs.getString('lang') ?? 'en';
+    country = prefs.getString('country') ?? 'US';
+    currency = country == 'BD' ? 'BDT' : 'USD';
+    notify();
+  }
+
+  Future<void> setLang(String l) async {
+    lang = l;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('lang', l);
+    notify();
+  }
+
+  Future<void> setCountry(String c) async {
+    country = c;
+    currency = c == 'BD' ? 'BDT' : 'USD';
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('country', c);
+    notify();
+  }
+
+  void setVehicle(Vehicle? v) {
+    vehicle = v;
+    notify();
+  }
+}
